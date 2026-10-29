@@ -1,0 +1,15 @@
+python -m venv .venv 			    (створити віртувальне середовище)
+
+.\.venv\Scripts\Activate.ps1 		(актувати віртуальне середовище)
+
+pip install colorama 			    (установити пакет)
+
+python structure_dir.py "D:\IT school\Books_IT"  	(запустити скрипт)
+
+-----------------------------------------------------------------
+pip freeze 					                (щоб створити requirements.tx)
+
+python -m pip install -r requirements.txt 	(щоб установити всі пакети з requirements.tx)
+-----------------------------------------------------------------
+
+deactivate 				            (деактувати віртуальне середовище)
