@@ -10,14 +10,40 @@ def parse_input(user_input: str) -> tuple[str, list[str]]:
 
     return command, args
 
+def validate_contact(name: str, phone: str) -> bool:
+    """Перевіряє коректність імені та номера телефону."""
+    # Перевіряємо, що ім'я та номер не порожні та номер складається лише з цифр.
+    return bool(name.strip()) and bool(phone.strip()) and phone.isdigit() 
+
+
+def find_contact_name(name: str, contacts: dict[str, str]) -> str | None:
+    """Знаходить ім'я контакту без урахування регістру."""
+    for saved_name in contacts:
+        # casefold() використовується для порівняння рядків без урахування регістру.
+        if saved_name.casefold() == name.casefold(): 
+            return saved_name
+
+    return None
 
 def add_contact(args: list[str], contacts: dict[str, str]) -> str:
     """Додає контакт або оновлює номер, якщо ім'я вже існує."""
     if len(args) != 2:
         return "Invalid arguments. Usage: add [name] [phone]"
 
-    name, phone = args # Додаємо контакт як словник, де ключ - ім'я, а значення - номер телефону.
-    contacts[name] = phone
+    # Додаємо контакт як словник, де ключ - ім'я, а значення - номер телефону.
+    name, phone = args 
+    if not validate_contact(name, phone):
+        return "Invalid contact information."
+
+    # Перевіряємо, чи існує контакт з таким ім'ям.
+    existing_name = find_contact_name(name, contacts)
+
+    # Якщо контакт з таким ім'ям вже існує, оновлюємо його номер телефону.
+    if existing_name is not None: 
+        contacts[existing_name] = phone
+        return "Contact updated."
+
+    contacts[name] = phone # Додаємо новий контакт.
 
     return "Contact added."
 
@@ -29,17 +55,18 @@ def change_contact(args: list[str], contacts: dict[str, str]) -> str:
 
     name, phone = args
 
-    # Шукаємо ім'я без урахування регістру.
-    contact_name = next(
-        (saved_name for saved_name in contacts if saved_name.casefold() == name.casefold()),
-        None,
-    )
+    # Перевіряємо коректність введених даних.
+    if not validate_contact(name, phone):
+        return "Invalid name or phone number."
 
-    if contact_name is None:
+    # Шукаємо контакт без урахування регістру.
+    existing_name = find_contact_name(name, contacts)
+
+    # Якщо контакт не знайдено, повертаємо повідомлення про помилку.
+    if existing_name is None: 
         return "Contact not found."
 
-    contacts[contact_name] = phone
-
+    contacts[existing_name] = phone
     return "Contact updated."
 
 
@@ -50,12 +77,14 @@ def show_phone(args: list[str], contacts: dict[str, str]) -> str:
 
     name = args[0]
 
-    # Пошук імені також не залежить від регістру.
-    for saved_name, phone in contacts.items():
-        if saved_name.casefold() == name.casefold():
-            return phone
+    # Якщо контакт знайдено, повертаємо його номер телефону, інакше повідомляємо, що контакт не знайдено.
+    existing_name = find_contact_name(name, contacts) 
 
-    return "Contact not found."
+    # Якщо контакт не знайдено, повертаємо повідомлення про помилку.
+    if existing_name is None: 
+        return "Contact not found."
+
+    return contacts[existing_name]
 
 
 def show_all(contacts: dict[str, str]) -> str:
